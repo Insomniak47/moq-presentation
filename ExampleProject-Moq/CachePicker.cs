@@ -24,6 +24,9 @@ namespace ExampleProject_Moq
 
         public Customer GetCustomerById(Guid id)
         {
+            if (_cache.Exists(id))
+                return _cache.GetCustomerById(id);
+
             //TODO:CN -- This ain't good
             return _provider.Load().First(x => x.Id == id);
         }

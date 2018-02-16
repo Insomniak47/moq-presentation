@@ -30,7 +30,7 @@ namespace ExampleProject_Moq.Test
 
         //NOT A GREAT TEST METHOD. DONT USE THIS IN REAL LIFE. PLZ
         [TestMethod]
-        public void GetCustomerById_ValidSomewhere_ReturnsCusomer()
+        public void GetCustomerById_ValidSomewhere_ReturnsCustomer()
         {
 
             //Arrange:
@@ -50,7 +50,7 @@ namespace ExampleProject_Moq.Test
         }
 
         [TestMethod]
-        public void GetCustomerById_ValidIdInCache_ReturnsFromCache()
+        public void GetCustomerById_ValidIdInCache_ReturnsFromCacheNoLoad()
         {
             //Arrange
             _cache.Setup(x => x.Exists(_validGuid))
@@ -66,11 +66,11 @@ namespace ExampleProject_Moq.Test
 
             //Assert
             Assert.AreEqual(_validCustomer, result);
-            
+            _provider.Verify(x => x.Load(), Times.Never);
         }
 
         [TestMethod]
-        public void GetCustomerById_NotInCache_ChecksCacheNoLoad()
+        public void GetCustomerById_NotInCache_ChecksCache()
         {
             //Arrange:
             _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
@@ -86,7 +86,7 @@ namespace ExampleProject_Moq.Test
 
             //Assert:
             Assert.AreEqual(_validCustomer, result);
-            _provider.Verify(x => x.Load(), Times.Never);
+            
             
         }
 
@@ -95,12 +95,13 @@ namespace ExampleProject_Moq.Test
         {
             //Arrange:
             _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
-                .Returns(true);
+                .Returns(false);
 
-            _cache.Setup(x => x.GetCustomerById(_validGuid))
-                .Returns(_validCustomer);
+            _provider.Setup(x => x.Load())
+                .Returns(_validCustomers);
 
             var underTest = ConstructCachePicker();
+            
             //Act:
             var unused = underTest.GetCustomerById(_validGuid);
 
@@ -142,6 +143,8 @@ namespace ExampleProject_Moq.Test
         {
             _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
                 .Throws(new InvalidOperationException());
+
+            _cache.Object.Exists(_validGuid);
         }
 
         //CN: More @ https://github.com/Moq/moq4/wiki/Quickstart
@@ -154,7 +157,7 @@ namespace ExampleProject_Moq.Test
         }
 
 
-        private interface IOutParamTestClass
+        public interface IOutParamTestClass
         {
             void DoThing(out bool thing);
         }
