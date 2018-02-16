@@ -164,6 +164,33 @@ namespace ExampleProject_Moq.Test
             Assert.AreEqual(Guid.NewGuid().ToString().Length, setMe);
         }
 
+
+        //CN: Witchcraft.
+        [TestMethod]
+        public void CallbacksToChangeOutParamCapture()
+        {
+            var outParamTester = new Mock<IOutParamTestClass>();
+            var first = true;
+            var second = false;
+
+
+            outParamTester.Setup(x => x.DoThing(out first))
+                .Callback(() => outParamTester.Setup(x => x.DoThing(out second)));
+
+            // ReSharper disable once RedundantAssignment
+            var firstResult = false;
+
+            // ReSharper disable once RedundantAssignment
+            var secondResult = true;
+
+            outParamTester.Object.DoThing(out firstResult);
+            outParamTester.Object.DoThing(out secondResult);
+
+            Assert.AreEqual(first,firstResult);
+            Assert.AreEqual(second,secondResult);
+
+        }
+
         //CN: More @ https://github.com/Moq/moq4/wiki/Quickstart
 
 
