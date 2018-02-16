@@ -16,6 +16,7 @@ namespace ExampleProject_Moq.Test
         private readonly Guid _validGuid;
         private readonly Customer _validCustomer;
 
+        //CN: Initialized before every test
         public CachePicker_Test()
         {
             //Set up the base mock models that we're going to have to use. 
