@@ -118,10 +118,12 @@ namespace ExampleProject_Moq.Test
                 .Returns(false)
                 .Returns(true);
 
-            var exists = new List<bool>();
-            exists.Add(_cache.Object.Exists(Guid.NewGuid()));
-            exists.Add(_cache.Object.Exists(Guid.NewGuid()));
-            exists.Add(_cache.Object.Exists(Guid.NewGuid()));
+            var exists = new List<bool>
+            {
+                _cache.Object.Exists(Guid.NewGuid()),
+                _cache.Object.Exists(Guid.NewGuid()),
+                _cache.Object.Exists(Guid.NewGuid())
+            };
 
             CollectionAssert.AreEquivalent(exists, new List<bool> { true, false, true });
         }
