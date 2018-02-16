@@ -8,7 +8,6 @@ namespace ExampleProject_Moq
     //TODO: CN -- Write this class. 
     //END GOAL: Return something to a customer from a storage location by Id
     //Requirements -> Check a cache for it first
-    //             -> Throw if we get a nil Id
 
    
 

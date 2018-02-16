@@ -43,30 +43,120 @@ namespace ExampleProject_Moq.Test
             var picker = new CachePicker(_provider.Object, _cache.Object);
 
             //Act:
-            var response = picker.GetCustomerById(_validGuid);
+            var result = picker.GetCustomerById(_validGuid);
 
             //Assert:
-            Assert.AreEqual(_validGuid, response.Id);
+            Assert.AreEqual(_validGuid, result.Id);
         }
 
         [TestMethod]
-        public void GetCustomerById_InCache_ReturnsFromCache()
+        public void GetCustomerById_ValidIdInCache_ReturnsFromCache()
         {
-            throw new NotImplementedException();
+            //Arrange
+            _cache.Setup(x => x.Exists(_validGuid))
+                .Returns(true);
+
+            _cache.Setup(x => x.GetCustomerById(_validGuid))
+                .Returns(_validCustomer);
+
+            var underTest = ConstructCachePicker();
+
+            //Act
+            var result = underTest.GetCustomerById(_validGuid);
+
+            //Assert
+            Assert.AreEqual(_validCustomer, result);
+            
         }
 
         [TestMethod]
-        public void GetCustomerById_NotInCache_CallsToProvider()
+        public void GetCustomerById_NotInCache_ChecksCacheNoLoad()
         {
-            throw new NotImplementedException();
+            //Arrange:
+            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
+                .Returns(false);
+
+            _provider.Setup(x => x.Load())
+                .Returns(_validCustomers);
+
+            var underTest = ConstructCachePicker();
+
+            //Act:
+            var result = underTest.GetCustomerById(_validGuid);
+
+            //Assert:
+            Assert.AreEqual(_validCustomer, result);
+            _provider.Verify(x => x.Load(), Times.Never);
+            
         }
 
         [TestMethod]
-        public void GetCustomerById_NotInCache_ChecksCache()
+        public void GetCustomerById_ValidIdNotInCache_CallsToProvider()
         {
-            throw new NotImplementedException();
+            //Arrange:
+            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
+                .Returns(true);
+
+            _cache.Setup(x => x.GetCustomerById(_validGuid))
+                .Returns(_validCustomer);
+
+            var underTest = ConstructCachePicker();
+            //Act:
+            var unused = underTest.GetCustomerById(_validGuid);
+
+            //Assert:
+            _provider.Verify(x => x.Load(), Times.Once);
         }
 
 
+        [TestMethod]
+        public void Sequences()
+        {
+            _cache.SetupSequence(x => x.Exists(It.IsAny<Guid>()))
+                .Returns(true)
+                .Returns(false)
+                .Returns(true);
+
+            var exists = new List<bool>();
+            exists.Add(_cache.Object.Exists(Guid.NewGuid()));
+            exists.Add(_cache.Object.Exists(Guid.NewGuid()));
+            exists.Add(_cache.Object.Exists(Guid.NewGuid()));
+
+            CollectionAssert.AreEquivalent(exists, new List<bool> { true, false, true });
+        }
+
+        [TestMethod]
+        public void OutParams()
+        {
+            var toReturn = true;
+            var mock = new Mock<IOutParamTestClass>();
+
+            mock.Setup(x => x.DoThing(out toReturn));
+            mock.Object.DoThing(out var result);
+
+            Assert.AreEqual(toReturn, result);
+        }
+
+        [TestMethod, ExpectedException(typeof(InvalidOperationException))]
+        public void Exceptions()
+        {
+            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
+                .Throws(new InvalidOperationException());
+        }
+
+        //CN: More @ https://github.com/Moq/moq4/wiki/Quickstart
+
+
+        private CachePicker ConstructCachePicker()
+        {
+            //CN: For convenience
+            return new CachePicker(_provider.Object, _cache.Object);
+        }
+
+
+        private interface IOutParamTestClass
+        {
+            void DoThing(out bool thing);
+        }
     }
 }
