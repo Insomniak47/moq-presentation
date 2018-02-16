@@ -5,7 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="G:\Dev\dnd5eManager\NantauCommon\NantauCommon.csproj" />
+    <ProjectReference Include="..\NantauCommon\NantauCommon.csproj" />
   </ItemGroup>
 
 </Project>
