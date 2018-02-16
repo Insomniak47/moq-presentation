@@ -149,6 +149,20 @@ namespace ExampleProject_Moq.Test
             _cache.Object.Exists(_validGuid);
         }
 
+        [TestMethod]
+        public void Callbacks()
+        {
+            var setMe = 0;
+
+            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
+                .Callback((Guid x) => setMe = x.ToString().Length)
+                .Returns(true);
+
+            _cache.Object.Exists(_validGuid);
+
+            Assert.AreEqual(Guid.NewGuid().ToString().Length, setMe);
+        }
+
         //CN: More @ https://github.com/Moq/moq4/wiki/Quickstart
 
 
