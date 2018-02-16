@@ -15,14 +15,14 @@ namespace ExampleProject_Moq.Test
         private readonly List<Customer> _validCustomers;
         private readonly Guid _validGuid;
         private readonly Customer _validCustomer;
-
+        
         //CN: Initialized before every test
         public CachePicker_Test()
         {
             //Set up the base mock models that we're going to have to use. 
             _provider = new Mock<IProvider<Customer>>();
             _cache = new Mock<ICustomerCache>();
-
+            
             //CN: Model objects that I want to use for my tests
             _validGuid = Guid.NewGuid();
             _validCustomer = new Customer(_validGuid);
@@ -109,6 +109,17 @@ namespace ExampleProject_Moq.Test
             _cache.Verify(x => x.Exists(_validGuid), Times.Once);
         }
 
+        [TestMethod]
+        public void BasicSetup()
+        {
+
+            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
+                .Returns(true);
+
+            var res = _cache.Object.Exists(Guid.NewGuid());
+
+            Assert.IsTrue(res);
+        }
 
 
         [TestMethod]
