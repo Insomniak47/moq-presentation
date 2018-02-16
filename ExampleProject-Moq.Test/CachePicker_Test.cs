@@ -70,6 +70,25 @@ namespace ExampleProject_Moq.Test
         }
 
         [TestMethod]
+        public void GetCustomerById_ValidIdNotInCache_CallsToProvider()
+        {
+            //Arrange:
+            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
+                .Returns(false);
+
+            _provider.Setup(x => x.Load())
+                .Returns(_validCustomers);
+
+            var underTest = ConstructCachePicker();
+
+            //Act:
+            var unused = underTest.GetCustomerById(_validGuid);
+
+            //Assert:
+            _provider.Verify(x => x.Load(), Times.Once);
+        }
+
+        [TestMethod]
         public void GetCustomerById_NotInCache_ChecksCache()
         {
             //Arrange:
@@ -86,28 +105,9 @@ namespace ExampleProject_Moq.Test
 
             //Assert:
             Assert.AreEqual(_validCustomer, result);
-            
-            
+            _cache.Verify(x => x.Exists(_validGuid), Times.Once);
         }
 
-        [TestMethod]
-        public void GetCustomerById_ValidIdNotInCache_CallsToProvider()
-        {
-            //Arrange:
-            _cache.Setup(x => x.Exists(It.IsAny<Guid>()))
-                .Returns(false);
-
-            _provider.Setup(x => x.Load())
-                .Returns(_validCustomers);
-
-            var underTest = ConstructCachePicker();
-            
-            //Act:
-            var unused = underTest.GetCustomerById(_validGuid);
-
-            //Assert:
-            _provider.Verify(x => x.Load(), Times.Once);
-        }
 
 
         [TestMethod]
